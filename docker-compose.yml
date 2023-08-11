@@ -13,6 +13,10 @@ volumes:
     name: wp-data
   db_data:
     name: db-data
+  prometheus_data:
+    name: prometheus-data
+  grafana_data:
+    name: grafana-data
 
 services:
   traefik:
@@ -23,6 +27,10 @@ services:
       - "--log.filepath=/log-file.log"
       - "--log.format=json"
       - "--api=true"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.buckets=0.1,0.3,1.2,5.0"
+      - "--providers.docker=true"
+      - "--providers.docker.watch"
       - "--ping=true"
       - "--accesslog=true"
       - "--accesslog.bufferingsize=100"
@@ -66,62 +74,59 @@ services:
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
 
   nexus:
-    image: sonatype/nexus3:3.34.1
-    container_name: nexus
-    restart: always
-    volumes:
-      - "nexus-data:/sonatype-work"
-    networks:
-      - default
-
-    labels:
-     - "traefik.enable=true"
-     - "traefik.docker.network=web_net"
-     - "traefik.http.routers.repo.entrypoints=http"
-     - "traefik.http.routers.repo.rule=Host(`registry.alishazaee.ir`)"
-     - "traefik.http.routers.repo.service=repo-secure"
-     - "traefik.http.routers.repo.middlewares=https-redirect"
-     - "traefik.http.routers.repo-secure.entrypoints=https"
-     - "traefik.http.routers.repo-secure.rule=Host(`registry.alishazaee.ir`)"
-     - "traefik.http.routers.repo-secure.tls=true"
-     - "traefik.http.routers.repo-secure.tls.options=default"
-     - "traefik.http.routers.repo-secure.tls.certresolver=mycert"
-     - "traefik.http.routers.repo-secure.service=repo-secure"
-     - "traefik.http.services.repo-secure.loadbalancer.server.port=8081"
-
-     - "traefik.http.routers.nexusdocker.entrypoints=http"
-     - "traefik.http.routers.nexusdocker.rule=Host(`docker.alishazaee.ir`)"
-     - "traefik.http.routers.nexusdocker.middlewares=https-redirect"
-     - "traefik.http.routers.nexusdocker-secure.entrypoints=https"
-     - "traefik.http.routers.nexusdocker.service=nexusdocker-secure"
-     - "traefik.http.routers.nexusdocker-secure.rule=Host(`docker.alishazaee.ir`)"
-     - "traefik.http.routers.nexusdocker-secure.tls=true"
-     - "traefik.http.routers.nexusdocker-secure.tls.options=default"
-     - "traefik.http.routers.nexusdocker-secure.tls.certresolver=mycert"
-     - "traefik.http.routers.nexusdocker-secure.service=nexusdocker-secure"
-     - "traefik.http.services.nexusdocker-secure.loadbalancer.server.port=8085"
-
-     - "traefik.http.routers.nexusmirror.entrypoints=http"
-     - "traefik.http.routers.nexusmirror.rule=Host(`nexus.alishazaee.ir`)"
-     - "traefik.http.routers.nexusmirror.middlewares=https-redirect"
-     - "traefik.http.routers.nexusmirror.service=nexusmirror-secure"
-     - "traefik.http.routers.nexusmirror-secure.entrypoints=https"
-     - "traefik.http.routers.nexusmirror-secure.rule=Host(`nexus.alishazaee.ir`)"
-     - "traefik.http.routers.nexusmirror-secure.tls=true"
-     - "traefik.http.routers.nexusmirror-secure.tls.options=default"
-     - "traefik.http.routers.nexusmirror-secure.tls.certresolver=mycert"
-     - "traefik.http.routers.nexusmirror-secure.service=nexusmirror-secure"
-     - "traefik.http.services.nexusmirror-secure.loadbalancer.server.port=8084"
-
+     image: sonatype/nexus3:3.34.1
+     container_name: nexus
+     restart: always
+     volumes:
+       - "nexus-data:/sonatype-work"
+     networks:
+       - default
+ 
+     labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web_net"
+      - "traefik.http.routers.repo.entrypoints=http"
+      - "traefik.http.routers.repo.rule=Host(`registry.alishazaee.ir`)"
+      - "traefik.http.routers.repo.service=repo-secure"
+      - "traefik.http.routers.repo.middlewares=https-redirect"
+      - "traefik.http.routers.repo-secure.entrypoints=https"
+      - "traefik.http.routers.repo-secure.rule=Host(`registry.alishazaee.ir`)"
+      - "traefik.http.routers.repo-secure.tls=true"
+      - "traefik.http.routers.repo-secure.tls.options=default"
+      - "traefik.http.routers.repo-secure.tls.certresolver=mycert"
+      - "traefik.http.routers.repo-secure.service=repo-secure"
+      - "traefik.http.services.repo-secure.loadbalancer.server.port=8081"
+ 
+      - "traefik.http.routers.nexusdocker.entrypoints=http"
+      - "traefik.http.routers.nexusdocker.rule=Host(`docker.alishazaee.ir`)"
+      - "traefik.http.routers.nexusdocker.middlewares=https-redirect"
+      - "traefik.http.routers.nexusdocker-secure.entrypoints=https"
+      - "traefik.http.routers.nexusdocker.service=nexusdocker-secure"
+      - "traefik.http.routers.nexusdocker-secure.rule=Host(`docker.alishazaee.ir`)"
+      - "traefik.http.routers.nexusdocker-secure.tls=true"
+      - "traefik.http.routers.nexusdocker-secure.tls.options=default"
+      - "traefik.http.routers.nexusdocker-secure.tls.certresolver=mycert"
+      - "traefik.http.routers.nexusdocker-secure.service=nexusdocker-secure"
+      - "traefik.http.services.nexusdocker-secure.loadbalancer.server.port=8085"
+ 
+      - "traefik.http.routers.nexusmirror.entrypoints=http"
+      - "traefik.http.routers.nexusmirror.rule=Host(`nexus.alishazaee.ir`)"
+      - "traefik.http.routers.nexusmirror.middlewares=https-redirect"
+      - "traefik.http.routers.nexusmirror.service=nexusmirror-secure"
+      - "traefik.http.routers.nexusmirror-secure.entrypoints=https"
+      - "traefik.http.routers.nexusmirror-secure.rule=Host(`nexus.alishazaee.ir`)"
+      - "traefik.http.routers.nexusmirror-secure.tls=true"
+      - "traefik.http.routers.nexusmirror-secure.tls.options=default"
+      - "traefik.http.routers.nexusmirror-secure.tls.certresolver=mycert"
+      - "traefik.http.routers.nexusmirror-secure.service=nexusmirror-secure"
+      - "traefik.http.services.nexusmirror-secure.loadbalancer.server.port=8084"
+ 
   web_server:
     image: nginx:latest
     container_name: nginx
     restart: always
     networks:
       - default
-    deploy:
-      mode: replicated
-      replicas: 2
       
     volumes:
        - ./nginx/conf:/etc/nginx/conf.d
@@ -169,3 +174,60 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: 'root_pass'    
     volumes:
       - db_data:/var/lib/mysql
+
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    networks:
+      - default
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+
+    labels:
+     - "traefik.enable=true"
+     - "traefik.docker.network=web_net"
+     - "traefik.http.routers.prometheus.entrypoints=http"
+     - "traefik.http.routers.prometheus.rule=Host(`prometheus.alishazaee.ir`)"
+     - "traefik.http.routers.prometheus.middlewares=https-redirect"
+     -  "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+     - "traefik.http.middlewares.web-auth.basicauth.users=ali:$$apr1$$zeVIHiFN$$7cCu2c44b1xXKR1bzyRhn1"
+     - "traefik.http.routers.prometheus.service=prometheus-secure"
+     - "traefik.http.routers.prometheus-secure.entrypoints=https"
+     - "traefik.http.routers.prometheus-secure.rule=Host(`prometheus.alishazaee.ir`)"
+     - "traefik.http.routers.prometheus-secure.tls=true"
+     - "traefik.http.routers.prometheus-secure.tls.options=default"
+     - "traefik.http.routers.prometheus-secure.tls.certresolver=mycert"
+     - "traefik.http.routers.prometheus-secure.service=prometheus-secure"
+     - "traefik.http.services.prometheus-secure.loadbalancer.server.port=9090"
+
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    networks:
+      - default
+    labels:
+     - "traefik.enable=true"
+     - "traefik.docker.network=web_net"
+     - "traefik.http.routers.grafana.entrypoints=http"
+     - "traefik.http.routers.grafana.rule=Host(`grafana.alishazaee.ir`)"
+     - "traefik.http.routers.grafana.middlewares=https-redirect"
+     - "traefik.http.routers.grafana.service=grafana-secure"
+     - "traefik.http.routers.grafana-secure.entrypoints=https"
+     - "traefik.http.middlewares.web-auth.basicauth.users=ali:$$apr1$$zeVIHiFN$$7cCu2c44b1xXKR1bzyRhn1"
+     - "traefik.http.routers.grafana-secure.rule=Host(`grafana.alishazaee.ir`)"
+     - "traefik.http.routers.grafana-secure.tls=true"
+     - "traefik.http.routers.grafana-secure.tls.options=default"
+     - "traefik.http.routers.grafana-secure.tls.certresolver=mycert"
+     - "traefik.http.routers.grafana-secure.service=grafana-secure"
+     - "traefik.http.services.grafana-secure.loadbalancer.server.port=3000"
+
