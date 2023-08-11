@@ -9,6 +9,10 @@ volumes:
     name: traefik-acme
   nexus-data:
     name: nexus-data
+  wp_data:
+    name: wp-data
+  db_data:
+    name: db-data
 
 services:
   traefik:
@@ -115,20 +119,27 @@ services:
     restart: always
     networks:
       - default
+    deploy:
+      mode: replicated
+      replicas: 2
+      
     volumes:
        - ./nginx/conf:/etc/nginx/conf.d
     labels:
+     - "traefik.enable=true"
+     - "traefik.docker.network=web_net"
      - "traefik.http.routers.nginx.entrypoints=http"
      - "traefik.http.routers.nginx.rule=Host(`alishazaee.ir`)"
      - "traefik.http.routers.nginx.middlewares=https-redirect"
-     - "traefik.http.routers.nginx.service=nexusmirror-secure"
+     - "traefik.http.routers.nginx.service=nginx-secure"
      - "traefik.http.routers.nginx-secure.entrypoints=https"
      - "traefik.http.routers.nginx-secure.rule=Host(`alishazaee.ir`)"
      - "traefik.http.routers.nginx-secure.tls=true"
      - "traefik.http.routers.nginx-secure.tls.options=default"
      - "traefik.http.routers.nginx-secure.tls.certresolver=mycert"
-     - "traefik.http.routers.nginx-secure.service=nexusmirror-secure"
+     - "traefik.http.routers.nginx-secure.service=nginx-secure"
      - "traefik.http.services.nginx-secure.loadbalancer.server.port=80"
+
     depends_on:
       - wordpress
 
@@ -158,4 +169,3 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: 'root_pass'    
     volumes:
       - db_data:/var/lib/mysql
-      
