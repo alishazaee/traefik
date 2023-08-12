@@ -152,6 +152,8 @@ services:
   wordpress:
     image: wordpress:php8.0
     restart: always
+    deploy:
+      replicas: 2
     environment:
           WORDPRESS_DB_HOST: db
           WORDPRESS_DB_USER: db_user
