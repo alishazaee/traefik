@@ -130,6 +130,7 @@ services:
       
     volumes:
        - ./nginx/conf:/etc/nginx/conf.d
+       - ./nginx/log:/var/log/nginx
     labels:
      - "traefik.enable=true"
      - "traefik.docker.network=web_net"
@@ -152,8 +153,6 @@ services:
   wordpress:
     image: wordpress:php8.0
     restart: always
-    deploy:
-      replicas: 2
     environment:
           WORDPRESS_DB_HOST: db
           WORDPRESS_DB_USER: db_user
@@ -233,3 +232,22 @@ services:
      - "traefik.http.routers.grafana-secure.service=grafana-secure"
      - "traefik.http.services.grafana-secure.loadbalancer.server.port=3000"
 
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:0.10.0
+    container_name: nginx-exporter
+    networks:
+      - default
+    command: ["-nginx.scrape-uri", "http://nginx:80/health"]
+
+  fluentd:
+    build:
+      context: ./fluentd
+    volumes:
+      - ./fluentd/conf:/etc/fluent  # Mount custom Fluentd config
+      - ./nginx/log:/var/log/nginx  # Mount Nginx log directory
+
+    networks:
+      - default
+    depends_on:
+      - web_server  # Assuming Nginx service is named 'web_server'
