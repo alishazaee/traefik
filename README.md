@@ -37,8 +37,43 @@ This project sets up a robust DevOps environment using Docker and Traefik as a r
 
 ## grafana dashboards
 ![Screenshot from 2024-04-11 18-14-06](https://github.com/alishazaee/traefik/assets/53411387/3407e7b9-33f8-48ac-8c56-2aa044696c4f)
-
 ![Screenshot from 2024-04-11 18-14-06](https://github.com/alishazaee/traefik/assets/53411387/2532ef55-6e84-4092-8643-438765cadf9b)
+
+This project includes comprehensive monitoring solutions for Nginx using Grafana dashboards. Through the integration of Prometheus and Nginx exporter, as well as log data captured by Fluentd, we provide real-time insights into the performance and health of the Nginx web server.
+
+### Nginx Exporter Dashboard
+
+The Nginx Exporter Dashboard gives a visual representation of critical metrics from the Nginx web server, such as:
+
+- **Processed Connections**: Counts the total number of connections processed by Nginx, including accepted and handled connections.
+- **Active Connections**: Shows the number of currently active connections, along with details on connections that are reading, writing, or waiting.
+- **Total Requests**: Tracks the total number of HTTP requests that the server has received over time.
+
+This dashboard is essential for detecting performance bottlenecks, understanding user behavior, and ensuring high availability.
+
+### Fluentd Nginx Log Dashboard
+
+- **Latency**: Measures the time taken to process HTTP GET requests. The graph provides percentile distributions (P50, P90, P99) for detailed latency analysis.
+- **Traffic**: Displays the rate of HTTP requests over time, broken down by request paths. This helps in identifying the traffic patterns and the most frequently accessed endpoints.
+- **Availability**: Represents the percentage of non-error responses (excluding 4xx and 5xx status codes), giving a quick overview of the server's health.
+
+Fluentd collects and aggregates logs from Nginx, and this data is visualized on the Fluentd Nginx Log Dashboard, providing insights into:
+
+
+Monitoring these metrics is vital for maintaining operational performance and can assist in early detection of irregular patterns that could indicate issues.
+
+### How to Use the Dashboards
+
+To view the dashboards:
+
+1. Ensure that Prometheus and Grafana are running via the Docker Compose setup provided in this project.
+2. Access Grafana through `http://grafana.alishazaee.ir` and log in with your credentials. ( You can change this domain in the docker-compose file )
+3. Navigate to the dashboard panel to view the Nginx Exporter and Fluentd dashboards.
+   
+*Note: Replace `alishazaee.ir` with your actual domain name and ensure that the Nginx Exporter and Fluentd are configured correctly to send metrics to Prometheus.*
+
+
+
 
 ### Generate Treafik pass
 ```
