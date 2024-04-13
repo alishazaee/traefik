@@ -37,7 +37,8 @@ This project sets up a robust DevOps environment using Docker and Traefik as a r
 
 ## grafana dashboards
 ![Screenshot from 2024-04-11 18-14-06](https://github.com/alishazaee/traefik/assets/53411387/3407e7b9-33f8-48ac-8c56-2aa044696c4f)
-![Screenshot from 2024-04-11 18-14-06](https://github.com/alishazaee/traefik/assets/53411387/2532ef55-6e84-4092-8643-438765cadf9b)
+
+![Screenshot from 2024-04-11 18-11-16](https://github.com/alishazaee/traefik/assets/53411387/9582a797-7c5f-4864-b6d1-faa44f1ac35e)
 
 This project includes comprehensive monitoring solutions for Nginx using Grafana dashboards. Through the integration of Prometheus and Nginx exporter, as well as log data captured by Fluentd, we provide real-time insights into the performance and health of the Nginx web server.
 
